@@ -1,0 +1,41 @@
+{
+    "format_version": 2,
+    "header": {
+        "description": "伝言ゲームのビヘイビアパック(ビヘイビアパックのみです)",
+        "name": "伝言ゲームのビヘイビアパック",
+        "uuid": "e9612628-5851-4bdb-93f2-e6299a961c69",
+        "version": [ 1, 0, 0 ],
+        "min_engine_version": [ 1, 21, 20 ]
+    },
+    "metadata":{
+        "authors":["Yon4800"]
+    },
+    "modules": [
+        {
+            "type": "data",
+            "uuid": "ac129ebc-8782-4f7f-935f-6e219710a987",
+            "version": [1, 1, 0]
+        },
+        {
+            "type": "script",
+            "language": "javascript",
+            "entry": "scripts/main.js",
+            "uuid": "d94fd9f1-5d2a-46c8-ac9a-c77fb13b2ead",
+            "version": [1, 1, 0]
+        }
+    ],
+    "dependencies": [
+        {
+            "uuid": "6e1a4c25-f1db-4049-a1d0-98677501c7b4",
+            "version": [1, 1, 0]
+        },
+        {
+            "module_name": "@minecraft/server",
+            "version": "2.0.0-alpha"
+        },
+        {
+            "module_name": "@minecraft/server-ui",
+            "version": "2.0.0-alpha"
+        }
+    ]
+}
