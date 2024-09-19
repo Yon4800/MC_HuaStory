@@ -28,6 +28,8 @@ function generateShuffledMatrix(size) {
 let agree = 0;
 let agreepoint = 0;
 
+let gamestart = false;
+
 async function games(sender) {
     const allplayer = world.getPlayers();
     agree = 0;
@@ -94,8 +96,8 @@ async function game4(playernum, playermatrix, one, sender) {
             await system.waitTicks(20 * 10);
         }
     }
-    await system.waitTicks(20 * 5);
     world.sendMessage("すべて終了しました");
+    await system.waitTicks(20 * 5);
 }
 
 /**
@@ -110,9 +112,11 @@ async function game5(allplayer, playernum, playermatrix, doneS, one, gamecount, 
             });
         }
         else if (gamecount >= playernum) {
+            gamestart = false;
             game4(playernum, playermatrix, one, sender);
         }
         else if (gamecount >= 1 && playernum <= 1) {
+            gamestart = false;
             game4(playernum, playermatrix, one, sender);
         }
         else {
@@ -133,6 +137,7 @@ async function game6(allplayer, playernum, playermatrix, doneS, one, gamecount, 
         let spc = String(re3.formValues);
         if (spc.length > 20) {
             v.sendMessage("20文字を超えています。もう一度お試しください");
+            system.waitTicks(20 * 5);
             game6(allplayer, playernum, playermatrix, doneS, one, gamecount, v, j, a, sender);
         }
         else {
@@ -175,6 +180,7 @@ function game7(allplayer, playernum, playermatrix, doneS, one, gamecount, v, j, 
                 let spc = String(re3.formValues);
                 if (spc.length > 20) {
                     v.sendMessage("20文字を超えています。もう一度お試しください");
+                    system.waitTicks(20 * 5);
                     game7(allplayer, playernum, playermatrix, doneS, one, gamecount, v, j, a, sender);
                 }
                 else {
@@ -212,6 +218,7 @@ function games2(allplayer, playernum) {
         playermatrix = generateShuffledMatrix(playernum);
     }
     let gamecount = 0;
+    gamestart = true;
     game5(allplayer, playernum, playermatrix, doneS, one, gamecount);
 }
 
@@ -230,6 +237,9 @@ world.beforeEvents.chatSend.subscribe(async (e) => {
                         break;
                 }
             });
+        }
+        if (e.message === "もう一度" && gamestart === true) {
+            game5();
         }
     }, 100);
 });
