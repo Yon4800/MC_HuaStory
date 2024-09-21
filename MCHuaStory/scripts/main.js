@@ -105,13 +105,13 @@ async function game4(playermatrix, one) {
             let wordall = "";
             for (let publicj = 0; publicj < playernum; publicj++) {
                 world.sendMessage(playermatrix[publici][publicj][0] + ": 「" + playermatrix[publici][publicj][1] + "」");
-                wordall += playermatrix[publici][publicj][1] + " ";
+                wordall += "「" + playermatrix[publici][publicj][1] + "」";
                 world.getPlayers().forEach((v, i, a) => {
                     v.playSound("random.orb", { pitch: 0.5 });
                 });
                 await system.waitTicks(20 * 5);
             }
-            world.sendMessage(publici + ": 「" + wordall + "」");
+            world.sendMessage(publici + ": " + wordall);
             world.getPlayers().forEach((v, i, a) => {
                 v.playSound("random.pop", { pitch: 0.5 });
             });
