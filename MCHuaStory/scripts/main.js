@@ -34,23 +34,22 @@ async function games(sender) {
     const allplayer = world.getPlayers();
     agree = 0;
     agreepoint = 0;
-    await system.runTimeout(() => {
+    await system.waitTicks(5);
+    allplayer.forEach((v, i, a) => {
         const startok = new ActionFormData();
-        allplayer.forEach((v, i, a) => {
-            startok.title("スタートしていい？").button("Yes").button("No").show(v).then((re2) => {
-                switch (re2.selection) {
-                    case 0:
-                        agreepoint++;
-                        agree++;
-                        game3(sender, v);
-                        break;
-                    case 1:
-                        agreepoint++;
-                        break;
-                }
-            });
+        startok.title("スタートしていい？").button("Yes").button("No").show(v).then((re2) => {
+            switch (re2.selection) {
+                case 0:
+                    agreepoint++;
+                    agree++;
+                    game3(sender, v);
+                    break;
+                case 1:
+                    agreepoint++;
+                    break;
+            }
         });
-    }, 5);
+    });
 }
 
 async function game3(sender, v, a) {
@@ -65,7 +64,7 @@ async function game3(sender, v, a) {
             });
             world.sendMessage("全員の同意が得られたので開始します");
             await system.waitTicks(20 * 5);
-            games2(allplayer, playernum, sender);
+            games2(sender);
         }
         else if (agree < agreepoint) {
             world.getPlayers().forEach((v, i, a) => {
@@ -81,11 +80,9 @@ async function game3(sender, v, a) {
     }
 }
 
-/**
- * @param {Player} sender
- * @param {number} playernum
- */
-async function game4(playernum, playermatrix, one, sender) {
+async function game4(playermatrix, one) {
+    const allplayer = world.getPlayers();
+    let playernum = allplayer.length;
     world.getPlayers().forEach((v, i, a) => {
         v.playSound("random.levelup", { pitch: 2 });
     });
@@ -96,7 +93,7 @@ async function game4(playernum, playermatrix, one, sender) {
     });
     world.sendMessage("結果発表");
     await system.waitTicks(20 * 5);
-    if (one = true) {
+    if (one === true) {
         world.sendMessage(playermatrix[0] + ": " + playermatrix[1]);
         world.getPlayers().forEach((v, i, a) => {
             v.playSound("random.orb", { pitch: 0.5 });
@@ -107,80 +104,76 @@ async function game4(playernum, playermatrix, one, sender) {
         for (let publici = 0; publici < playernum; publici++) {
             let wordall = "";
             for (let publicj = 0; publicj < playernum; publicj++) {
-                world.sendMessage(playermatrix[publici][publicj][0] + ": " + playermatrix[publici][publicj][1]);
+                world.sendMessage(playermatrix[publici][publicj][0] + ": 「" + playermatrix[publici][publicj][1] + "」");
                 wordall += playermatrix[publici][publicj][1] + " ";
                 world.getPlayers().forEach((v, i, a) => {
                     v.playSound("random.orb", { pitch: 0.5 });
                 });
                 await system.waitTicks(20 * 5);
             }
-            world.sendMessage(publici + ": " + wordall);
+            world.sendMessage(publici + ": 「" + wordall + "」");
             world.getPlayers().forEach((v, i, a) => {
                 v.playSound("random.pop", { pitch: 0.5 });
             });
-            await system.waitTicks(20 * 10);
-            world.sendMessage("次に行きます");
-            await system.waitTicks(20 * 10);
+            await system.waitTicks(20 * 5);
+            if (publici >= playernum - 1) {
+                world.sendMessage("すべて終了しました");
+                world.getPlayers().forEach((v, i, a) => {
+                    v.playSound("random.pop", { pitch: 0.5 });
+                });
+            }
+            else {
+                world.sendMessage("次に行きます");
+            }
+            await system.waitTicks(20 * 5);
         }
     }
-    world.sendMessage("すべて終了しました");
-    world.getPlayers().forEach((v, i, a) => {
-        v.playSound("random.pop", { pitch: 0.5 });
-    });
     gamestart = false;
     await system.waitTicks(20 * 5);
 }
 
-/**
- * @param {Player[]} allplayer
- * @param {number} playernum
- */
-async function game5(allplayer, playernum, playermatrix, doneS, one, gamecount, sender) {
+async function game5(playermatrix, doneS, one, gamecount, sender) {
     await system.waitTicks(20 * 5);
-    await system.run(() => {
-        if (gamecount <= 0) {
-            allplayer.forEach((v, j, a) => {
-                doneS[gamecount] = 0;
-                game6(allplayer, playernum, playermatrix, doneS, one, gamecount, v, j, a, sender);
-            });
-        }
-        else if (gamecount >= playernum) {
-            game4(playernum, playermatrix, one, sender);
-        }
-        else if (gamecount >= 1 && playernum <= 1) {
-            game4(playernum, playermatrix, one, sender);
-        }
-        else {
-            allplayer.forEach((v, j, a) => {
-                doneS[gamecount] = 0;
-                game7(allplayer, playernum, playermatrix, doneS, one, gamecount, v, j, a, sender);
-            });
-        }
-    });
+    const allplayer = world.getPlayers();
+    let playernum = allplayer.length;
+    if (gamecount <= 0) {
+        allplayer.forEach((v, j, a) => {
+            doneS[gamecount] = 0;
+            game6(playernum, playermatrix, doneS, one, gamecount, sender, v, j, a);
+        });
+    }
+    else if (gamecount >= playernum) {
+        game4(playermatrix, one, sender);
+    }
+    else if (gamecount >= 1 && playernum <= 1) {
+        game4(playermatrix, one, sender);
+    }
+    else {
+        allplayer.forEach((v, j, a) => {
+            doneS[gamecount] = 0;
+            game7(playernum, playermatrix, doneS, one, gamecount, sender, v, j, a);
+        });
+    }
 }
 
-/**
- * @param {Player[]} allplayer
- * @param {number} playernum
- */
-async function game6(allplayer, playernum, playermatrix, doneS, one, gamecount, v, j, a, sender) {
+async function game6(playernum, playermatrix, doneS, one, gamecount, sender, v, j, a) {
     await system.waitTicks(20 * 5);
     const gameformsf = new ModalFormData();
-    gameformsf.title((gamecount + 1) + "回目 ※変更はできません 20文字までです").textField("story", "ここにストーリを入力").show(v).then((re3) => {
+    gameformsf.title((gamecount + 1) + "回目 ※変更はできません 40文字までです").textField("story", "ここにストーリを入力").show(v).then((re3) => {
         let spc = String(re3.formValues);
-        if (spc.length > 20) {
-            v.sendMessage("20文字を超えています。もう一度お試しください。");
+        if (spc.length > 35) {
+            v.sendMessage("40文字を超えています。もう一度お試しください。");
             v.playSound("random.pop", { pitch: 0.5 });
-            game6(allplayer, playernum, playermatrix, doneS, one, gamecount, v, j, a, sender);
+            game6(playernum, playermatrix, doneS, one, gamecount, sender, v, j, a);
         }
         else if (spc === "" || spc === undefined || spc === null || spc === "undefined" || spc === "null") {
             v.sendMessage("空欄です。もう一度お試しください。");
             v.playSound("random.pop", { pitch: 0.5 });
-            game6(allplayer, playernum, playermatrix, doneS, one, gamecount, v, j, a, sender);
+            game6(playernum, playermatrix, doneS, one, gamecount, sender, v, j, a);
         }
         else {
             for (let k = 0; k < playernum; k++) {
-                if (one = true) {
+                if (one === true) {
                     playermatrix = [v.name, spc];
                 }
                 else {
@@ -195,7 +188,7 @@ async function game6(allplayer, playernum, playermatrix, doneS, one, gamecount, 
                 doneS[gamecount]++;
                 world.sendMessage("現在" + doneS[gamecount] + "人が終わっています。");
                 gamecount++;
-                game5(allplayer, playernum, playermatrix, doneS, one, gamecount, sender);
+                game5(playermatrix, doneS, one, gamecount, sender);
             }
             else {
                 doneS[gamecount]++;
@@ -204,33 +197,29 @@ async function game6(allplayer, playernum, playermatrix, doneS, one, gamecount, 
                 if (doneS[gamecount] >= playernum) {
                     world.sendMessage("全員終わりました。");
                     gamecount++;
-                    game5(allplayer, playernum, playermatrix, doneS, one, gamecount, sender);
+                    game5(playermatrix, doneS, one, gamecount, sender);
                 }
             }
         }
     });
 }
 
-/**
- * @param {Player[]} allplayer
- * @param {number} playernum
- */
-async function game7(allplayer, playernum, playermatrix, doneS, one, gamecount, v, j, a, sender) {
+async function game7(playernum, playermatrix, doneS, one, gamecount, sender, v, j, a) {
     await system.waitTicks(20 * 5);
     for (let k = 0; k < playernum; k++) {
         if (playermatrix[k][gamecount] === j) {
             const gameforms = new ModalFormData();
-            gameforms.title((gamecount + 1) + "回目 \n20文字までです").textField(playermatrix[k][gamecount][1], "ここにストーリの続きを入力").show(v).then((re3) => {
-                let spc = String(re3.formValues);
-                if (spc.length > 20) {
-                    v.sendMessage("20文字を超えています。もう一度お試しください");
+            gameforms.title((gamecount + 1) + "回目 \n40文字までです").textField("前回: " + playermatrix[k][gamecount - 1][1], "ここにストーリの続きを入力").show(v).then((re4) => {
+                let spc = String(re4.formValues);
+                if (spc.length > 35) {
+                    v.sendMessage("40文字を超えています。もう一度お試しください");
                     v.playSound("random.pop", { pitch: 0.5 });
-                    game7(allplayer, playernum, playermatrix, doneS, one, gamecount, v, j, a, sender);
+                    game7(playernum, playermatrix, doneS, one, gamecount, sender, v, j, a);
                 }
                 else if (spc === "" || spc === undefined || spc === null || spc === "undefined" || spc === "null") {
                     v.sendMessage("空欄です。もう一度お試しください。");
                     v.playSound("random.pop", { pitch: 0.5 });
-                    game7(allplayer, playernum, playermatrix, doneS, one, gamecount, v, j, a, sender);
+                    game7(playernum, playermatrix, doneS, one, gamecount, sender, v, j, a);
                 }
                 else {
                     for (let l = 0; l < playernum; l++) {
@@ -244,7 +233,7 @@ async function game7(allplayer, playernum, playermatrix, doneS, one, gamecount, 
                     if (doneS[gamecount] >= playernum) {
                         world.sendMessage("全員終わりました。");
                         gamecount++;
-                        game5(allplayer, playernum, playermatrix, doneS, one, gamecount, sender);
+                        game5(playermatrix, doneS, one, gamecount, sender);
                     }
                 }
             });
@@ -252,13 +241,11 @@ async function game7(allplayer, playernum, playermatrix, doneS, one, gamecount, 
     }
 }
 
-/**
- * @param {Player[]} allplayer
- * @param {number} playernum
- */
-function games2(allplayer, playernum) {
+function games2(sender) {
+    const allplayer = world.getPlayers();
+    let playernum = allplayer.length;
     world.sendMessage("開始します");
-    let playermatrix = 0;
+    let playermatrix = null;
     let doneS = [];
     let one = false;
     if (playernum <= 1) {
@@ -270,7 +257,7 @@ function games2(allplayer, playernum) {
     }
     let gamecount = 0;
     gamestart = true;
-    game5(allplayer, playernum, playermatrix, doneS, one, gamecount);
+    game5(playermatrix, doneS, one, gamecount);
 }
 
 world.beforeEvents.chatSend.subscribe(async (e) => {
