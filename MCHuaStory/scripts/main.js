@@ -30,34 +30,34 @@ let agreepoint = 0;
 
 let gamestart = false;
 
-async function games(sender) {
-    const allplayer = world.getPlayers();
+async function games(sender, v, i, a) {
     agree = 0;
     agreepoint = 0;
     await system.waitTicks(5);
-    allplayer.forEach((v, i, a) => {
-        const startok = new ActionFormData();
-        startok.title("スタートしていい？").button("Yes").button("No").show(v).then((re2) => {
-            switch (re2.selection) {
-                case 0:
-                    agreepoint++;
-                    agree++;
-                    game3(sender, v);
-                    break;
-                case 1:
-                    agreepoint++;
-                    game3(sender, v);
-                    break;
-            }
-            if (re2.canceled) {
-                world.sendMessage("UIが消されました。もう一度選択してください。");
-                games(sender);
-            }
-        });
+    let agreetf
+    const startok = new ActionFormData();
+    startok.title("スタートしていい？").button("Yes").button("No").show(v).then((re2) => {
+        switch (re2.selection) {
+            case 0:
+                agreepoint++;
+                agree++;
+                agreetf = true;
+                game3(sender, v, agreetf);
+                break;
+            case 1:
+                agreepoint++;
+                agreetf = false;
+                game3(sender, v, agreetf);
+                break;
+        }
+        if (re2.canceled) {
+            v.sendMessage("UIが消されました。もう一度選択してください。");
+            games(sender, v, i, a);
+        }
     });
 }
 
-async function game3(sender, v, a) {
+async function game3(sender, v, agreetf) {
     const allplayer = world.getPlayers();
     let playernum = allplayer.length;
     if (agreepoint >= playernum) {
@@ -80,8 +80,14 @@ async function game3(sender, v, a) {
             agreepoint = 0;
         }
     }
-    else {
+    else if (agreetf === true) {
         v.sendMessage("同意しました。全員が同意するまでしばらくお待ちください。")
+    }
+    else if (agreetf === false) {
+        v.sendMessage("同意しませんでした。")
+    }
+    else{
+        v.sendMessage("このメッセージが出たとすれば、何かしらおかしな動作をした可能性があります。もう一度再読み込み /reload してやり直してください。")
     }
 }
 
@@ -270,10 +276,13 @@ world.beforeEvents.chatSend.subscribe(async (e) => {
         world.sendMessage("ゲームが間もなく開始される可能性があります");
         await system.waitTicks(20 * 5);
         const formstart = new ActionFormData();
+        const allplayer = world.getPlayers();
         formstart.title("ゲームを開始する？").body("ゲームを開始しますか？(ほぼマイクラは操作しません)").button("はい").button("いいえ").show(e.sender).then((re) => {
             switch (re.selection) {
                 case 0:
-                    games(e.sender);
+                    allplayer.forEach((v, i, a) => {
+                        games(e.sender, v, i, a);
+                    });
                     break;
                 case 1:
                     world.sendMessage("キャンセルされました。");
