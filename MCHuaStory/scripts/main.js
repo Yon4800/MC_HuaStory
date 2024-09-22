@@ -46,7 +46,12 @@ async function games(sender) {
                     break;
                 case 1:
                     agreepoint++;
+                    game3(sender, v);
                     break;
+            }
+            if (re2.canceled) {
+                world.sendMessage("UIが消されました。もう一度選択してください。");
+                games(sender);
             }
         });
     });
@@ -261,20 +266,22 @@ function games2(sender) {
 }
 
 world.beforeEvents.chatSend.subscribe(async (e) => {
-    await system.runTimeout(() => {
-        if (e.message === "ゲームを開始する" && gamestart === false) {
-            world.sendMessage("ゲームが間もなく開始される可能性があります");
-            const formstart = new ActionFormData();
-            formstart.title("ゲームを開始する？").body("ゲームを開始しますか？(ほぼマイクラは操作しません)").button("はい").button("いいえ").show(e.sender).then((re) => {
-                switch (re.selection) {
-                    case 0:
-                        games(e.sender);
-                        break;
-                    case 1:
-                        world.sendMessage("キャンセルされました。");
-                        break;
-                }
-            });
-        }
-    }, 100);
+    if (e.message === "ゲームを開始する" && gamestart === false) {
+        world.sendMessage("ゲームが間もなく開始される可能性があります");
+        await system.waitTicks(20 * 5);
+        const formstart = new ActionFormData();
+        formstart.title("ゲームを開始する？").body("ゲームを開始しますか？(ほぼマイクラは操作しません)").button("はい").button("いいえ").show(e.sender).then((re) => {
+            switch (re.selection) {
+                case 0:
+                    games(e.sender);
+                    break;
+                case 1:
+                    world.sendMessage("キャンセルされました。");
+                    break;
+            }
+            if (re.canceled) {
+                world.sendMessage("UIが消されました。もう一度「ゲームを開始する」と打ってください。");
+            }
+        });
+    }
 });
